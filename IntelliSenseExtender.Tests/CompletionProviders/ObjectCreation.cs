@@ -370,6 +370,29 @@ namespace IntelliSenseExtender.Tests.CompletionProviders
         }
 
         [Test]
+        public void NestedTypeAsGenericType()
+        {
+            const string source = @"
+                using System.Collections.Generic;
+
+                public class Test {
+                    public List<Containing.Nested> Method() {
+                        return 
+                    }
+                }
+
+                public class Containing
+                {
+                    public class Nested { }
+                }";
+
+            var completions = GetCompletions(Provider, source, "return ");
+            var completionsNames = completions.Select(completion => completion.DisplayText);
+
+            Assert.That(completionsNames, Does.Contain("new List<Containing.Nested>()"));
+        }
+
+        [Test]
         public void TriggerCompletionAfterAssignment()
         {
             const string source = @"
