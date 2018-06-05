@@ -85,6 +85,13 @@ namespace IntelliSenseExtender.Tests.CompletionProviders
             var document = GetTestDocument(source, additinalFile);
             var completionContext = GetContext(document, provider, position);
             provider.ProvideCompletionsAsync(completionContext).Wait();
+
+            for (int i = 0; i < 500; i++)
+            {
+                completionContext = GetContext(document, provider, position);
+                provider.ProvideCompletionsAsync(completionContext).Wait();
+            }
+
             var completions = GetCompletions(completionContext);
             return completions;
         }
