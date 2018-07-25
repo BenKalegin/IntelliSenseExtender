@@ -145,6 +145,42 @@ namespace IntelliSenseExtender.Tests.CompletionProviders
                 Does.Contain("new List<string>()  (System.Collections.Generic)"));
         }
 
+        public void UsingAliasesShouldBeAccounted()
+        {
+            const string source = @"
+                using StrList = System.Collections.Generic.List<string>;
+
+                public class Test {
+                    public void Method() {
+                        System.Collections.Generic.IList<string> list =  
+                    }
+                }";
+
+            var completions = GetCompletions(Provider, source, " = ");
+            var completionsNames = completions.Select(completion => completion.DisplayText);
+            Assert.That(completionsNames,
+                Does.Contain("new StrList()")
+                & Does.Not.Contain("new List<string>()  (System.Collections.Generic)"));
+        }
+
+        [Test]
+        public void UsingAliasesShouldBeAccounted_AfterNew()
+        {
+            const string source = @"
+                using StrList = System.Collections.Generic.List<string>;
+
+                public class Test {
+                    public void Method() {
+                        System.Collections.Generic.IList<string> list = new 
+                    }
+                }";
+
+            var completions = GetCompletions(Provider, source, "new ");
+            var completionsNames = completions.Select(completion => completion.DisplayText);
+            Assert.That(completionsNames, Does.Contain("StrList")
+                & Does.Not.Contain("List<string>  (System.Collections.Generic)"));
+        }
+
         [Test]
         public void DoNotSuggestGenericTypesIfConstraintNotSatisfied()
         {

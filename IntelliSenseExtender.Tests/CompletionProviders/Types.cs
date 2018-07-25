@@ -191,6 +191,32 @@ namespace IntelliSenseExtender.Tests.CompletionProviders
         }
 
         [Test]
+        public void DoNotSuggestTypesWithUsingAliases()
+        {
+            const string mainSource = @"
+                using NmClass = NM.Class;
+
+                public class Test {
+                    public void Method() {
+                        /*here*/
+                    }
+                }";
+            const string classFile = @"
+                namespace NM
+                {
+                    public class Class
+                    {
+                    }
+                }";
+
+            var completions = GetCompletions(Provider, mainSource, classFile, "/*here*/");
+            var completionsNames = completions.Select(completion => completion.DisplayText);
+            Assert.That(completionsNames, Does.Not.Contain("Class  (NM)")
+                & Does.Not.Contain("NmClass")
+                & Does.Not.Contain("NmClass (NM)"));
+        }
+
+        [Test]
         public void DoNotProvideObsoleteTypes()
         {
             const string mainSource = @"
